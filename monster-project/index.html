@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Monster Slayer</title>
+    <script src="https://npmcdn.com/vue/dist/vue.js"></script>
+    <link rel="stylesheet" href="css/foundation.min.css">
+    <link rel="stylesheet" href="css/app.css">
+</head>
+<body>
+<div id="app">
+    <section class="row">
+        <div class="small-6 columns">
+            <h1 class="text-center">YOU</h1>
+            <div class="healthbar">
+                <div
+                  class="healthbar text-center"
+                  style="background-color: green; margin: 0; color: white;"
+                  :style="{width: displayUserHealth + '%'}">
+                  {{ displayUserHealth }}
+                </div>
+            </div>
+        </div>
+        <div class="small-6 columns">
+            <h1 class="text-center">MONSTER</h1>
+            <div class="healthbar">
+                <div
+                  class="healthbar text-center"
+                  style="background-color: green; margin: 0; color: white;"
+                  :style="{width: displayMonsterHealth + '%'}">
+                  {{ displayMonsterHealth }}
+                </div>
+            </div>
+        </div>
+    </section>
+    <section class="row controls" v-if="!started">
+        <div class="small-12 columns">
+            <button id="start-game" @click="{{started = !started}}">START NEW GAME</button>
+        </div>
+    </section>
+    <section class="row controls" v-else>
+        <div class="small-12 columns">
+            <button id="attack" @click="attack">ATTACK</button>
+            <button id="special-attack" @click="specialAttack">SPECIAL ATTACK</button>
+            <button id="heal" @click="heal">HEAL</button>
+            <button id="give-up" @click="restart">GIVE UP</button>
+        </div>
+    </section>
+    <section class="row log" v-if="logs.length > 0">
+        <div class="small-12 columns">
+            <ul>
+                <li v-for="message in logs" :class="message.class">
+                  {{ message.text }}
+                </li>
+            </ul>
+        </div>
+    </section>
+</div>
+</body>
+</html>
+<script>
+new Vue({
+  el: "#app",
+  data: {
+    started: false,
+    moves: 0,
+    userHealth: 100,
+    monsterHealth: 100,
+    logs: []
+  },
+  computed: {
+    displayMonsterHealth: function() {
+      return this.monsterHealth < 0 ? 0 : this.monsterHealth
+    },
+    displayUserHealth: function() {
+      return this.userHealth < 0 ? 0 : this.userHealth
+    }
+  },
+  methods: {
+    attack: function() {
+      var hitpoints = Math.floor((Math.random() + .1) * 10)
+      this.moves++;
+      this.monsterHealth -= hitpoints;
+      this.logs.unshift({
+        text: `Player attacked for ${hitpoints} damage`,
+        class: "player-turn"
+      });
+    },
+    specialAttack: function() {
+      var hitpoints = Math.floor((Math.random() + .5) * 10)
+      this.moves++;
+      this.monsterHealth -= hitpoints
+      this.logs.unshift({
+        text: `Player used special attack for ${hitpoints} damage`,
+        class: "player-turn"
+      });
+    },
+    heal: function() {
+      this.moves++;
+      if (this.userHealth > 90) {
+        this.userHealth = 100
+      } else {
+        this.userHealth += 10
+      }
+      this.logs.unshift({
+        text: `Player healed 10`,
+        class: "player-turn"
+      });
+    },
+    restart: function() {
+      this.started = false
+      this.userHealth = 100
+      this.monsterHealth = 100
+      this.logs = []
+    }
+  },
+  watch: {
+    moves: function(value) {
+      var hitpoints = Math.floor((Math.random() + .1) * 10)
+      this.userHealth -= hitpoints
+      this.logs.unshift({
+        text: `Monster attacked for ${hitpoints} damage`,
+        class: "monster-turn"
+      });
+    }
+  }
+})
+</script>
